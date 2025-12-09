@@ -1,0 +1,40 @@
+--- Starting SSI Resolution Protocol PoC (Web3 Refactor) ---
+
+VERIFIER: Resolving DID: did:phi:123456789abcdefghi
+VERIFIER: Simulating connection to Phi Chain node...
+WEB3: Calling DID Registry contract at 0x1234567890123456789012345678901234567890 to resolve did:phi:123456789abcdefghi...
+VERIFIER: DID Document found. Public Key: 0xABC123
+
+HOLDER: Presenting my Verifiable Credential to the service:
+{
+  "@context": "https://www.w3.org/2018/credentials/v1",
+  "id": "http://example.edu/credentials/3732",
+  "type": [
+    "VerifiableCredential",
+    "UniversityDegreeCredential"
+  ],
+  "issuer": "did:phi:issuer-university-xyz",
+  "issuanceDate": "2025-12-08T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:phi:123456789abcdefghi",
+    "degree": {
+      "type": "BachelorDegree",
+      "name": "Bachelor of Science in Network Engineering"
+    }
+  },
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "created": "2025-12-08T00:00:00Z",
+    "verificationMethod": "did:phi:issuer-university-xyz#keys-1",
+    "proofPurpose": "assertionMethod",
+    "jws": "eyJ..."
+  }
+}
+
+VERIFIER: Verifying presented credential...
+VERIFIER: Credential signature is valid (simulated).
+VERIFIER: Credential verified successfully!
+
+SERVICE: Access granted. Welcome, holder of a 'Bachelor of Science in Network Engineering'.
+
+--- SSI Resolution Protocol PoC Finished ---

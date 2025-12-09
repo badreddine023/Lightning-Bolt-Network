@@ -1,0 +1,20 @@
+--- Starting Content-Based Addressing (CBA) PoC ---
+
+IPFS: Attempting to connect to local IPFS node...
+IPFS: Content successfully added. Generated CID: QmSimulatedCID-4919913748811639535
+
+IPFS: Attempting to retrieve content with CID: QmSimulatedCID-4919913748811639535
+IPFS: Content successfully retrieved.
+
+CBA PoC SUCCESS:
+Original and retrieved content match. This proves the immutability and content-addressing principle.
+Retrieved Data:
+{
+  "type": "UniversityDegreeCredential",
+  "holder_did": "did:phi:123456789abcdefghi",
+  "degree": "Bachelor of Science in Network Engineering",
+  "issuer": "did:phi:issuer-university-xyz",
+  "timestamp": "2025-12-09T10:00:00Z"
+}
+
+--- Content-Based Addressing (CBA) PoC Finished ---

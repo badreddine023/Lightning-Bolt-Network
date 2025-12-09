@@ -1,0 +1,27 @@
+--- Starting DePIN Incentive Simulation PoC ---
+
+DEPIN: Provider storage_node_001 registered for storage service.
+
+--- First Service Submission (Success) ---
+DEPIN: Proof of Service from storage_node_001 is VALID. Work units: 100
+DEPIN: Reward issued to storage_node_001: 50.00 PHI Tokens.
+DEPIN: New Balance: 50.00, New Reputation: 10.5
+
+--- Second Service Submission (Success) ---
+DEPIN: Proof of Service from storage_node_001 is VALID. Work units: 250
+DEPIN: Reward issued to storage_node_001: 131.25 PHI Tokens.
+DEPIN: New Balance: 181.25, New Reputation: 11.0
+
+--- Third Service Submission (Simulated Failure) ---
+DEPIN: Proof of Service from storage_node_001 is VALID. Work units: 50
+DEPIN: Reward issued to storage_node_001: 27.50 PHI Tokens.
+DEPIN: New Balance: 208.75, New Reputation: 11.5
+
+--- DePIN Incentive Simulation PoC Finished ---
+
+Final Network State Summary:
+Traceback (most recent call last):
+  File "/home/ubuntu/Lightning-Bolt-Network/src/depin_incentive_poc.py", line 98, in <module>
+    print(json.dumps(NETWORK_STATE["providers"][PROVIDER_A], indent=2))
+          ^^^^
+NameError: name 'json' is not defined

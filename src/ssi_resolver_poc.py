@@ -3,27 +3,50 @@ Proof-of-Concept for the Self-Sovereign Identity (SSI) Resolution Protocol
 as defined in the CORE_PROTOCOL.md for the Lightning Bolt Network.
 
 This script simulates:
-1.  A simple Phi Chain Nexus (a DID registry).
+1.  A simple Phi Chain Nexus (a DID registry) using a web3-like interface.
 2.  A User (Holder) with a DID and a Verifiable Credential (VC).
 3.  A Service (Verifier) that resolves the DID and verifies the VC.
 '''
 
 import json
+from web3 import Web3 # Using web3 for a more realistic simulation
 
 # --- 1. Simulated Phi Chain Nexus (DID Registry) ---
 # In a real system, this would be a smart contract on the Phi Chain.
-PHI_CHAIN_NEXUS = {
-    "did:phi:123456789abcdefghi": {
+# We simulate a web3 connection and a contract call.
+w3 = Web3(Web3.HTTPProvider('http://simulated-phi-chain-node:8545'))
+
+# Simulated Contract ABI and Address
+DID_REGISTRY_ADDRESS = '0x1234567890123456789012345678901234567890'
+DID_REGISTRY_ABI = [
+    {
+        "constant": True,
+        "inputs": [{"name": "did", "type": "string"}],
+        "name": "resolveDID",
+        "outputs": [{"name": "didDocument", "type": "string"}],
+        "type": "function"
+    }
+]
+
+# Simulated DID Document Storage
+SIMULATED_DID_DOCUMENTS = {
+    "did:phi:123456789abcdefghi": json.dumps({
         "publicKey": "0xABC123",  # A simplified public key
         "serviceEndpoint": "https://example.com/vc-service"
-    }
+    }),
+    "did:phi:unknown": None
 }
+
+# --- Simulated Contract Interaction ---
+def simulated_contract_call(did: str) -> str:
+    """Simulates a call to the resolveDID smart contract function."""
+    print(f"WEB3: Calling DID Registry contract at {DID_REGISTRY_ADDRESS} to resolve {did}...")
+    return SIMULATED_DID_DOCUMENTS.get(did)
 
 # --- 2. User (Holder) Data ---
 HOLDER_DID = "did:phi:123456789abcdefghi"
 
 # A simple Verifiable Credential (VC) issued by a trusted Issuer.
-# In a real system, this would be cryptographically signed.
 VERIFIABLE_CREDENTIAL = {
     "@context": "https://www.w3.org/2018/credentials/v1",
     "id": "http://example.edu/credentials/3732",
@@ -42,17 +65,25 @@ VERIFIABLE_CREDENTIAL = {
         "created": "2025-12-08T00:00:00Z",
         "verificationMethod": "did:phi:issuer-university-xyz#keys-1",
         "proofPurpose": "assertionMethod",
-        "jws": "eyJ...'''  # Simplified JWS signature
+        "jws": "eyJ..."  # Simplified JWS signature
     }
 }
 
 # --- 3. Service (Verifier) Logic ---
 
 def resolve_did(did: str) -> dict:
-    """Resolves a DID via the simulated Phi Chain Nexus."""
+    """Resolves a DID by simulating a web3 contract call."""
     print(f"VERIFIER: Resolving DID: {did}")
-    did_document = PHI_CHAIN_NEXUS.get(did)
-    if did_document:
+    
+    # Simulate web3 connection check
+    if not w3.is_connected():
+        print("VERIFIER: Simulating connection to Phi Chain node...")
+    
+    # Simulate contract call
+    did_document_json = simulated_contract_call(did)
+    
+    if did_document_json:
+        did_document = json.loads(did_document_json)
         print(f"VERIFIER: DID Document found. Public Key: {did_document['publicKey']}\n")
         return did_document
     else:
@@ -82,7 +113,7 @@ def verify_credential(vc: dict, holder_did_document: dict) -> bool:
 
 # --- Main Execution: Simulating the Protocol Flow ---
 if __name__ == "__main__":
-    print("--- Starting SSI Resolution Protocol PoC ---\n")
+    print("--- Starting SSI Resolution Protocol PoC (Web3 Refactor) ---\n")
 
     # Step 1: Verifier resolves the Holder's DID
     holder_did_document = resolve_did(HOLDER_DID)
