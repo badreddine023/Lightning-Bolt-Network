@@ -1,0 +1,37 @@
+--- Starting SSI Resolution Protocol PoC (Web3 Refactor & Refined) ---
+
+--- Setup: Storing full VC on IPFS (CBA) ---
+IPFS: Attempting to connect to local IPFS node...
+IPFS: Content successfully added. Generated CID: QmSimulatedCID6270731695666017326
+--------------------------------------------------
+--- Test Case 1: Valid DID Resolution and Verification (with CBA) ---
+VERIFIER: Resolving DID: did:phi:123456789abcdefghi
+VERIFIER: Simulating connection to Phi Chain node...
+WEB3: Calling DID Registry contract at 0x1234567890123456789012345678901234567890 to resolve did:phi:123456789abcdefghi...
+VERIFIER: DID Document found. Public Key: 0xABC123
+
+HOLDER: Presenting my Verifiable Credential Reference to the service:
+{
+  "type": "VerifiableCredentialReference",
+  "cid": "QmSimulatedCID6270731695666017326"
+}
+
+VERIFIER: Verifying presented credential reference...
+
+IPFS: Attempting to retrieve content with CID: QmSimulatedCID6270731695666017326
+IPFS: Content successfully retrieved.
+VERIFIER: Credential signature is valid (simulated).
+VERIFIER: Credential verified successfully!
+
+SERVICE: Access granted. Welcome, holder of a 'Bachelor of Science in Network Engineering'.
+--------------------------------------------------
+--- Test Case 2: Non-Existent DID Resolution (Error Handling) ---
+VERIFIER: Resolving DID: did:phi:nonexistent12345
+VERIFIER: Simulating connection to Phi Chain node...
+WEB3: Calling DID Registry contract at 0x1234567890123456789012345678901234567890 to resolve did:phi:nonexistent12345...
+VERIFIER: DID not found in Phi Chain Nexus.
+
+VERIFIER: Successfully handled non-existent DID: did:phi:nonexistent12345
+--------------------------------------------------
+
+--- SSI Resolution Protocol PoC Finished ---

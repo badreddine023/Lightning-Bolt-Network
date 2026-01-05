@@ -18,6 +18,9 @@ NETWORK_STATE = {
     "providers": {}  # {provider_id: {"service_type": "storage", "reputation": 0, "balance": 0}}
 }
 
+REPUTATION_DECAY_RATE = 0.05 # 5% decay per cycle
+DECAY_CYCLE_COUNT = 3 # Number of cycles to simulate decay
+
 # --- 2. DePIN Logic ---
 
 def register_provider(provider_id: str, service_type: str) -> bool:
@@ -54,6 +57,13 @@ def submit_proof_of_service(provider_id: str, work_units: int) -> bool:
         NETWORK_STATE["providers"][provider_id]["reputation"] -= 1
         return False
 
+def decay_reputation(provider_id: str):
+    """Applies a reputation decay to the provider's score."""
+    provider = NETWORK_STATE["providers"][provider_id]
+    decay_amount = provider["reputation"] * REPUTATION_DECAY_RATE
+    provider["reputation"] = max(0, provider["reputation"] - decay_amount)
+    print(f"DEPIN: Reputation decay applied to {provider_id}. Decay: {decay_amount:.2f}. New Rep: {provider['reputation']:.1f}")
+
 def issue_reward(provider_id: str, work_units: int):
     """Calculates and issues a token reward based on work units and reputation."""
     provider = NETWORK_STATE["providers"][provider_id]
@@ -72,7 +82,7 @@ def issue_reward(provider_id: str, work_units: int):
 
 # --- Main Execution: Simulating the DePIN Flow ---
 if __name__ == "__main__":
-    print("--- Starting DePIN Incentive Simulation PoC ---\n")
+    print("--- Starting DePIN Incentive Simulation PoC (Expanded) ---\n")
 
     PROVIDER_A = "storage_node_001"
     
@@ -93,6 +103,12 @@ if __name__ == "__main__":
     random.seed(0) # Seed the random number generator to ensure the failure
     submit_proof_of_service(PROVIDER_A, 50)
     random.seed(None) # Reset seed
+
+    # Step 5: Simulate Reputation Decay over several cycles
+    print("\n--- Reputation Decay Simulation ---")
+    for i in range(DECAY_CYCLE_COUNT):
+        print(f"DEPIN: Starting Decay Cycle {i+1}/{DECAY_CYCLE_COUNT}")
+        decay_reputation(PROVIDER_A)
     
     print("\n--- DePIN Incentive Simulation PoC Finished ---")
     print("\nFinal Network State Summary:")

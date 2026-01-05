@@ -10,8 +10,51 @@ This script simulates:
 
 import json
 from web3 import Web3 # Using web3 for a more realistic simulation
+import ipfshttpclient
+from typing import Dict, Any
 
 # --- 1. Simulated Phi Chain Nexus (DID Registry) ---
+
+# --- IPFS Client Logic (Integrated from CBA PoC) ---
+
+def store_content_on_ipfs(content: Dict[str, Any]) -> str:
+    """Simulates storing content on IPFS and returns the CID."""
+    print("IPFS: Attempting to connect to local IPFS node...")
+    try:
+        # Simulate the IPFS add operation
+        content_str = json.dumps(content, indent=2)
+        
+        # Simulate hashing and CID generation
+        cid = f"QmSimulatedCID{hash(content_str)}"
+        
+        print(f"IPFS: Content successfully added. Generated CID: {cid}")
+        return cid
+        
+    except Exception as e:
+        print(f"IPFS: Error connecting or adding content (simulated): {e}")
+        return ""
+
+def retrieve_content_from_ipfs(cid: str) -> Dict[str, Any] | None:
+    """Simulates retrieving content from IPFS using the CID."""
+    print(f"\nIPFS: Attempting to retrieve content with CID: {cid}")
+    try:
+        # Simulate the IPFS get operation
+        if "QmSimulatedCID" in cid:
+            # In a real system, this would retrieve the content from IPFS
+            # For this PoC, we will simulate the retrieval of the original VC
+            print("IPFS: Content successfully retrieved.")
+            return ORIGINAL_VERIFIABLE_CREDENTIAL
+        else:
+            print("IPFS: Invalid CID. Content not found.")
+            return None
+            
+    except Exception as e:
+        print(f"IPFS: Error connecting or retrieving content (simulated): {e}")
+        return None
+
+# --- End IPFS Client Logic ---
+
+# In a real system, this would be a smart contract on the Phi Chain.
 # In a real system, this would be a smart contract on the Phi Chain.
 # We simulate a web3 connection and a contract call.
 w3 = Web3(Web3.HTTPProvider('http://simulated-phi-chain-node:8545'))
@@ -47,7 +90,8 @@ def simulated_contract_call(did: str) -> str:
 HOLDER_DID = "did:phi:123456789abcdefghi"
 
 # A simple Verifiable Credential (VC) issued by a trusted Issuer.
-VERIFIABLE_CREDENTIAL = {
+# This is the full VC content, which will be stored on IPFS.
+ORIGINAL_VERIFIABLE_CREDENTIAL = {
     "@context": "https://www.w3.org/2018/credentials/v1",
     "id": "http://example.edu/credentials/3732",
     "type": ["VerifiableCredential", "UniversityDegreeCredential"],
@@ -67,6 +111,12 @@ VERIFIABLE_CREDENTIAL = {
         "proofPurpose": "assertionMethod",
         "jws": "eyJ..."  # Simplified JWS signature
     }
+}
+
+# The presented VC will only contain a reference (CID) to the full VC on IPFS.
+VERIFIABLE_CREDENTIAL_REFERENCE = {
+    "type": "VerifiableCredentialReference",
+    "cid": "" # This will be populated at runtime
 }
 
 # --- 3. Service (Verifier) Logic ---
@@ -90,18 +140,29 @@ def resolve_did(did: str) -> dict:
         print("VERIFIER: DID not found in Phi Chain Nexus.\n")
         return None
 
-def verify_credential(vc: dict, holder_did_document: dict) -> bool:
-    """Verifies a credential presented by the holder."""
-    print("VERIFIER: Verifying presented credential...")
+def verify_credential(vc_reference: dict, holder_did_document: dict) -> bool:
+    """Verifies a credential presented by the holder, retrieving the full VC from IPFS."""
+    print("VERIFIER: Verifying presented credential reference...")
     
-    # 1. Check if the credential subject matches the holder's DID
-    if vc["credentialSubject"]["id"] != HOLDER_DID:
+    if vc_reference.get("type") != "VerifiableCredentialReference" or "cid" not in vc_reference:
+        print("VERIFIER: Invalid credential reference format.")
+        return False
+
+    # Step 1: Retrieve the full VC from IPFS using the CID
+    full_vc = retrieve_content_from_ipfs(vc_reference["cid"])
+    
+    if not full_vc:
+        print("VERIFIER: Failed to retrieve full VC from IPFS. Verification failed.")
+        return False
+
+    # Step 2: Check if the credential subject matches the holder's DID
+    if full_vc["credentialSubject"]["id"] != HOLDER_DID:
         print("VERIFIER: Credential subject does not match holder's DID. Verification failed.")
         return False
     
-    # 2. In a real system, we would use the holder's public key to verify the signature.
+    # Step 3: In a real system, we would use the holder's public key to verify the signature.
     # Here, we just simulate a successful signature check.
-    if "proof" in vc and vc["proof"]["jws"]:
+    if "proof" in full_vc and full_vc["proof"]["jws"]:
         print("VERIFIER: Credential signature is valid (simulated).")
     else:
         print("VERIFIER: Credential signature is missing or invalid. Verification failed.")
@@ -109,27 +170,42 @@ def verify_credential(vc: dict, holder_did_document: dict) -> bool:
 
     print("VERIFIER: Credential verified successfully!\n")
     return True
-
-
-# --- Main Execution: Simulating the Protocol Flow ---
 if __name__ == "__main__":
-    print("--- Starting SSI Resolution Protocol PoC (Web3 Refactor) ---\n")
+    print("--- Starting SSI Resolution Protocol PoC (Web3 Refactor & Refined) ---\n")
 
-    # Step 1: Verifier resolves the Holder's DID
+    # --- Setup: Store VC on IPFS and create reference ---
+    print("--- Setup: Storing full VC on IPFS (CBA) ---")
+    vc_cid = store_content_on_ipfs(ORIGINAL_VERIFIABLE_CREDENTIAL)
+    VERIFIABLE_CREDENTIAL_REFERENCE["cid"] = vc_cid
+    print("-" * 50)
+
+    # --- Test Case 1: Valid DID Resolution and Verification (with CBA) ---
+    print("--- Test Case 1: Valid DID Resolution and Verification (with CBA) ---")
     holder_did_document = resolve_did(HOLDER_DID)
 
     if holder_did_document:
-        # Step 2: Holder presents the Verifiable Credential
-        print(f"HOLDER: Presenting my Verifiable Credential to the service:\n{json.dumps(VERIFIABLE_CREDENTIAL, indent=2)}\n")
+        # Step 2: Holder presents the Verifiable Credential Reference
+        print(f"HOLDER: Presenting my Verifiable Credential Reference to the service:\n{json.dumps(VERIFIABLE_CREDENTIAL_REFERENCE, indent=2)}\n")
 
-        # Step 3: Verifier verifies the credential
-        is_valid = verify_credential(VERIFIABLE_CREDENTIAL, holder_did_document)
+        # Step 3: Verifier verifies the credential (which now retrieves from IPFS)
+        is_valid = verify_credential(VERIFIABLE_CREDENTIAL_REFERENCE, holder_did_document)
 
         # Step 4: Verifier grants access based on verification
         if is_valid:
-            degree_info = VERIFIABLE_CREDENTIAL['credentialSubject']['degree']['name']
+            # We need to retrieve the degree info from the original VC for the final message
+            degree_info = ORIGINAL_VERIFIABLE_CREDENTIAL['credentialSubject']['degree']['name']
             print(f"SERVICE: Access granted. Welcome, holder of a '{degree_info}'.")
         else:
             print("SERVICE: Access denied. Credential could not be verified.")
+    print("-" * 50)
+
+    # --- Test Case 2: Non-Existent DID Resolution (Error Handling) ---
+    print("--- Test Case 2: Non-Existent DID Resolution (Error Handling) ---")
+    NON_EXISTENT_DID = "did:phi:nonexistent12345"
+    non_existent_did_document = resolve_did(NON_EXISTENT_DID)
+
+    if not non_existent_did_document:
+        print(f"VERIFIER: Successfully handled non-existent DID: {NON_EXISTENT_DID}")
+    print("-" * 50)
 
     print("\n--- SSI Resolution Protocol PoC Finished ---")
