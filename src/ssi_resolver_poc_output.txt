@@ -1,0 +1,41 @@
+--- Starting SSI Resolution Protocol PoC ---
+
+--- Setup: Store full VC on IPFS (CBA) ---
+IPFS: Content stored. Generated CID: bafybeisimulated0c2e7d7338a5c3ca3bfb92bd12589ba0
+HOLDER: Presenting reference: {
+  "type": "VerifiableCredentialReference",
+  "cid": "bafybeisimulated0c2e7d7338a5c3ca3bfb92bd12589ba0"
+}
+
+------------------------------------------------------------
+--- Test Case 1: Valid DID resolution and credential verification ---
+VERIFIER: Resolving DID: did:phi:123456789abcdefghi
+WEB3: Querying phi:nexus:did-registry-v1 for did:phi:123456789abcdefghi...
+VERIFIER: DID Document found. Public key: did:phi:123456789abcdefghi#keys-1
+
+VERIFIER: Verifying presented credential reference...
+IPFS: Resolving content CID: bafybeisimulated0c2e7d7338a5c3ca3bfb92bd12589ba0
+IPFS: Content successfully retrieved.
+VERIFIER: Credential proof is valid (simulated).
+VERIFIER: Credential verified successfully!
+
+SERVICE: Access granted. Welcome, holder of a 'Bachelor of Science in Network Engineering'.
+RESULT: PASS - valid SSI/CBA flow accepted.
+------------------------------------------------------------
+--- Test Case 2: Non-existent DID resolution ---
+VERIFIER: Resolving DID: did:phi:nonexistent12345
+WEB3: Querying phi:nexus:did-registry-v1 for did:phi:nonexistent12345...
+VERIFIER: DID not found in Phi Chain Nexus.
+
+RESULT: PASS - unknown DID rejected: did:phi:nonexistent12345
+------------------------------------------------------------
+--- Test Case 3: Invalid content reference ---
+VERIFIER: Verifying presented credential reference...
+IPFS: Resolving content CID: bafybeimissing
+IPFS: Content not found.
+VERIFIER: Credential retrieval failed. Verification rejected.
+
+RESULT: PASS - missing content rejected.
+------------------------------------------------------------
+
+--- SSI Resolution Protocol PoC Finished: ALL TESTS PASSED ---
